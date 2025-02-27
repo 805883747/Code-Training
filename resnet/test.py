@@ -5,7 +5,10 @@ import torch
 import torch.nn as nn
 import torch.utils.data
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+import sys
+sys.path.append('E:\code train\lstm')
 from lstm import LSTM
+from resnet1D import ResNetBase
 
 # 1. 读取 CSV 文件
 data = pd.read_csv('../data/ETTh1.csv')
@@ -61,10 +64,15 @@ class lstm_model(nn.Module):
         input_size = input_shape[1]
         hidden_size = 64
         output_size = input_shape[1]
-        self.lstm = LSTM(input_size, hidden_size, n_layers=n_pre)
+        self.resnet = ResNetBase([2, 2, 2], [64, 128, 256], img_channels=input_size)
+        self.lstm = LSTM(256, hidden_size, n_layers=n_pre)
         self.linear = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
+        x = x.permute(0, 2, 1)
+        x = self.resnet(x)
+        x = x.permute(0, 2, 1)
+
         x = x.permute(1, 0, 2)
         _, x = self.lstm(x)
         x = x.permute(1, 0, 2)
@@ -79,7 +87,7 @@ criterion = nn.L1Loss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # 6. 训练模型
-epochs = 1
+epochs = 100
 for epoch in range(epochs):
     model.train()
     train_loss = 0
