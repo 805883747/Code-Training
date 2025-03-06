@@ -7,11 +7,12 @@ import torch.utils.data
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import sys
 sys.path.append('E:\code train\lstm')
+sys.path.append('E:\code train')
 from lstm import LSTM
 from resnet1D import ResNetBase
 
 # 1. 读取 CSV 文件
-data = pd.read_csv('../data/ETTh1.csv')
+data = pd.read_csv('data/ETTh1.csv')
 data = data.drop('date', axis=1)
 # 归一化
 samples = data.values
@@ -66,7 +67,11 @@ class lstm_model(nn.Module):
         output_size = input_shape[1]
         self.resnet = ResNetBase([2, 2, 2], [64, 128, 256], img_channels=input_size)
         self.lstm = LSTM(256, hidden_size, n_layers=n_pre)
-        self.linear = nn.Linear(hidden_size, output_size)
+        self.linear = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, output_size)
+        )
 
     def forward(self, x):
         x = x.permute(0, 2, 1)
