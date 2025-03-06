@@ -7,7 +7,7 @@ import torch.nn as nn
 from labml import tracker
 
 # 准备多头注意力
-class PrepareForMulitiHeadAttention(nn.Module):
+class PrepareForMultiHeadAttention(nn.Module):
 
     def __init__(self, d_model: int, heads: int, d_k: int, bias: bool):
         super().__init__()
@@ -34,9 +34,9 @@ class MultiHeadAttention(nn.Module):
         self.d_model = d_model  # 模型的维度
         self.d_k = d_model // heads  # 每个头的维度
 
-        self.query = PrepareForMulitiHeadAttention(d_model, heads, self.d_k, bias)  # 查询
-        self.key = PrepareForMulitiHeadAttention(d_model, heads, self.d_k, bias)  # 键
-        self.value = PrepareForMulitiHeadAttention(d_model, heads, self.d_k, bias=True)  # 值
+        self.query = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias)  # 查询
+        self.key = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias)  # 键
+        self.value = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias=True)  # 值
 
         self.softmax = nn.Softmax(dim=-1)  # 在键的时间维度上进行softmax
         self.output = nn.Linear(d_model, d_model)  # 输出线性变换
@@ -51,7 +51,7 @@ class MultiHeadAttention(nn.Module):
     
     # 准备掩码
     def prepare_mask(self, mask: torch.Tensor, query_shape: List[int], key_shape: List[int]):
-        # 检查掩码形状是否正确,mask形状为[seq_len_q, seq_len_k, batch_size]
+        # 检查掩码形状是否正确，mask形状可以是[1或seq_len_q, seq_len_k, 1或batch_size]
         assert mask.shape[0] == 1 or mask.shape[0] == query_shape[0]
         assert mask.shape[1] == key_shape[0]
         assert mask.shape[2] == 1 or mask.shape[2] == query_shape[1]
