@@ -47,7 +47,7 @@ class MultiHeadAttention(nn.Module):
 
     # 计算注意力得分
     def get_score(self, query: torch.Tensor, key: torch.Tensor):
-        return torch.einsum('ibhd,jbhd->bhij', query, key)
+        return torch.einsum('ibhd,jbhd->ijbh', query, key)
     
     # 准备掩码
     def prepare_mask(self, mask: torch.Tensor, query_shape: List[int], key_shape: List[int]):
@@ -86,12 +86,12 @@ class MultiHeadAttention(nn.Module):
         # 应用dropout
         attn = self.dropout(attn)
         # 加权求和，计算注意力得分
-        x = torch.einsum('bhij,bjhd->bihd', attn, value)
+        x = torch.einsum('ijbh,jbhd->ibhd', attn, value)
         
         self.attn = attn.detach()  # 保存注意力信息
 
         # 连接多个头
-        x = x.view(seq_len_q, batch_size, self.heads * self.d_k)
+        x = x.reshape(seq_len_q, batch_size, self.heads * self.d_k)
         # 输出线性变换
         x = self.output(x)
 

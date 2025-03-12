@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 
 from labml_nn.utils import clone_module_list
-from .feed_forward import FeedForward
-from .mha import MultiHeadAttention
-from .positional_encoding import get_positional_encoding
+from feed_forward import FeedForward
+from mha import MultiHeadAttention
+from positional_encoding import get_positional_encoding
 
 # 嵌入token并添加固定位置编码
 # 这个类将输入的token映射为向量并添加预计算的位置编码
